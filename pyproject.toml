@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "pynotas"
+version = "0.1.0"
+description = ""
+authors = ["Arthur Zopellaro <arthurazsoares@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PyPDF2 = "^1.27"
+"pdfminer.six" = "^20220319"
+pytz = "^2022.1"
+
+[tool.poetry.dev-dependencies]
+#pytest = "^7.1"
+#flake8-pytest-style = "^1.6"
+#pytest-mock = "^3.8"
+#pytest-cov = "^3.0"
+black = "^22.6"
+isort = "^5.10"
+flake8 = "^4.0"
+mypy = "^0.971"
+flake8-black = "^0.3"
+flake8-bugbear = "^22.6"
+flake8-simplify = "^0.19"
+flake8-builtins = "^1.5"
+pep8-naming = "^0.13"
+flake8-isort = "^4.1"
+flake8-noqa = "^1.2"
+flake8-docstrings = "^1.6"
+darglint = "^1.8"
+flake8-annotations = "^2.9"
+flake8-new-union-types = "^0.4"
+flake8-type-checking = "^2.0"
+flake8-bandit = "^3.0"
+types-pytz = "^2022.1"
+pydantic = "^1.9"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+enable_error_code = "ignore-without-code"
+exclude = ["venv"]
+
+#[tool.pytest.ini_options]
+#addopts = "--cov --cov-report term --cov-report html"
+
+[tool.coverage.run]
+branch = true
+source = ["pynotas"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 80
+sort = "cover"
+
+[tool.poetry.scripts]
+pynotas = 'pynotas.__main__:run'

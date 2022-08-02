@@ -1,0 +1,8 @@
+# IDE
+.idea
+
+# data folder
+data
+
+# python
+__pycache__

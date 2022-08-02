@@ -1,0 +1,15 @@
+[flake8]
+count = true
+extend-exclude = venv, .mypy_cache, data, .idea
+# black
+max-line-length = 88
+extend-ignore = E203
+# bugbear
+extend-immutable-calls = Path
+# docstrings
+docstring-convention = google
+# darglint
+strictness=short
+docstring-style = google
+# pytest
+per-file-ignores = tests/test_*.py:S101
