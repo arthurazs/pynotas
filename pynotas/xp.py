@@ -17,6 +17,7 @@ from pynotas.parser import (
 from pynotas.utils import (
     SEPARADORES_XP,
     LinhaPlanilha,
+    almost_equal,
     get_next,
     get_next_text,
     get_text,
@@ -267,7 +268,9 @@ def read_xp(
                 taxa_processados["taxa_total"]
                 for taxa_processados in dados_processados.values()
             )
-            if soma_taxa_por_ativo != total_taxa:
+            if not almost_equal(
+                soma_taxa_por_ativo, total_taxa  # type:ignore[arg-type]
+            ):
                 print(f"{soma_taxa_por_ativo=}, {total_taxa=}")
                 raise SystemError("soma_taxa_por_ativo != total_taxa")
 

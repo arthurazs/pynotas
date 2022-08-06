@@ -122,7 +122,13 @@ def clearing(
     c_elementos: Iterator["LTTextBoxHorizontal"],
 ) -> tuple[dec.Decimal, dec.Decimal]:
     c_texto = get_next_text(c_elementos)
-    c_total = abs(to_dec(c_texto))
+    while True:
+        try:
+            c_total = abs(to_dec(c_texto))
+        except dec.InvalidOperation:
+            c_texto = get_next_text(c_elementos)
+        else:
+            break
     c_texto = get_next_text(c_elementos)
     c_liquidacao = abs(to_dec(c_texto))
     return c_total, c_liquidacao
@@ -230,7 +236,7 @@ def _alternative(
         a_text = get_next_text(a_elements)
         if a_text == "C":
             return None, [], 0, a_text
-        if a_text in ("FRACIONARIO", "D2S", "NOR", "VISTA"):
+        if a_text in ("FRACIONARIO", "D2S", "NOR", "VISTA", "#"):
             continue
         try:
             dec.Decimal(a_text)

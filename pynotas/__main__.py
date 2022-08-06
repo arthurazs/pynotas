@@ -33,7 +33,7 @@ def run() -> None:
             csv_writer = csv.DictWriter(csv_file, CABECALHO, dialect="unix")
             csv_writer.writeheader()
             for index, file_name in enumerate(sorted(os.listdir(path))):
-                if file_name == '.gitkeep':
+                if file_name == ".gitkeep":
                     continue
                 print(f"Lendo nota {index+1:02} {file_name}...", end=" ")
                 file_path = path / file_name
