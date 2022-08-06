@@ -1,18 +1,17 @@
 import datetime as dt
 import decimal as dec
 import pathlib
-from typing import TYPE_CHECKING, Any, Final, Iterator, Sequence, TypedDict, TypeVar
+from typing import Any, Final, Sequence, TypedDict, TypeVar
 
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdftypes import resolve1
 
-if TYPE_CHECKING:
-    from pdfminer.layout import LTTextBoxHorizontal
-
-CodeReturnType = TypeVar("CodeReturnType", dt.datetime, str, dec.Decimal)
+AnyNumber = TypeVar("AnyNumber", int, dec.Decimal)
 
 FLOATING_ERROR_PRECISION: Final[dec.Decimal] = dec.Decimal(1e-10)
+
+
 DECIMAL2STR: Final[Sequence[str]] = (
     "quantidade",
     "taxa_ativo",
@@ -32,20 +31,6 @@ CABECALHO: Final[Sequence[str]] = (
     "local",
     "corretora",
     *DECIMAL2STR,
-)
-SEPARADORES_XP: Sequence[tuple[str | None, int]] = (
-    (" CI ER", 0),
-    (" CI", 0),
-    (None, -1),
-)
-SEPARADORES_NU: Sequence[tuple[str | None, int]] = (
-    ("F ON", 0),
-    ("F UNT", 0),
-    ("F PN ", 0),
-    (" PN ", 0),
-    (" CI ER", 0),
-    (" CI", 0),
-    (None, -1),
 )
 
 
@@ -74,40 +59,14 @@ def eprint(*args: Any) -> None:
     exit()
 
 
-def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
-    print()
-    while True:
-        try:
-            print(">>>", get_next_text(elements))
-        except StopIteration:
-            exit()
-
-
-def almost_equal(a: dec.Decimal, b: dec.Decimal) -> bool:
+def almost_equal(a: AnyNumber, b: AnyNumber) -> bool:
     return abs(a - b) <= FLOATING_ERROR_PRECISION
 
 
-def to_dec(t_number: str) -> dec.Decimal:
-    return dec.Decimal(t_number.replace(".", "").replace(",", "."))
-
-
-def get_next(
-    gn_elements: Iterator["LTTextBoxHorizontal"], gn_times: int = 1
-) -> "LTTextBoxHorizontal":
-    for _ in range(gn_times - 1):
-        next(gn_elements)
-    return next(gn_elements)
-
-
-def get_text(gt_element: "LTTextBoxHorizontal") -> str:
-    return gt_element.get_text().strip()
-
-
-def get_next_text(
-    gnt_elements: Iterator["LTTextBoxHorizontal"], gnt_times: int = 1
-) -> str:
-    gnt_element = get_next(gnt_elements, gnt_times)
-    return get_text(gnt_element)
+def assert_almost_equal(a: AnyNumber, b: AnyNumber, text: str = "") -> None:
+    if not almost_equal(a, b):
+        print(f"\n{a=}\n{b=}")
+        raise SystemError(f"[{text}] a != b")
 
 
 def assert1page(file_path: pathlib.Path) -> None:
@@ -119,3 +78,41 @@ def assert1page(file_path: pathlib.Path) -> None:
         pages_count = pages.get("Count", 0)
         if pages_count != 1:
             raise NotImplementedError("Only works for PDFs with one page...")
+
+
+def _assert_data_found(
+    data_nota: dt.datetime,
+    contador: int,
+    ativos: list[str],
+    tipos: list[str],
+    quantidades: list[dec.Decimal],
+    precos: list[dec.Decimal],
+    totais: list[dec.Decimal],
+    taxa_liquidacao: dec.Decimal,
+    taxa_emolumento: dec.Decimal,
+    nota_total_sem_taxa: dec.Decimal,
+    nota_total_com_taxa: dec.Decimal,
+) -> None:
+
+    if data_nota == dt.datetime(1970, 1, 1):
+        raise SystemError("data_nota not found in PDF")
+    if contador < 1:
+        raise SystemError("no assets in PDF?")
+    if len(ativos) == 0:
+        raise SystemError("no assets in PDF?")
+    if len(tipos) == 0:
+        raise SystemError("no types in PDF?")
+    if len(quantidades) == 0:
+        raise SystemError("no quantities in PDF?")
+    if len(precos) == 0:
+        raise SystemError("no prices in PDF?")
+    if len(totais) == 0:
+        raise SystemError("no totals in PDF?")
+    if taxa_liquidacao < 0:
+        raise SystemError("no liquidation fee in PDF?")
+    if taxa_emolumento < 0:
+        raise SystemError("no emolument fee in PDF?")
+    if nota_total_sem_taxa < 0:
+        raise SystemError("no total without fee in PDF?")
+    if nota_total_com_taxa < 0:
+        raise SystemError("no total with fee in PDF?")

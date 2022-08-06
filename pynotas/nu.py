@@ -1,28 +1,30 @@
 import datetime as dt
 import decimal as dec
 import pathlib
-from typing import Iterator, Mapping, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Iterator, Sequence
 
-import pytz as tz
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextBoxHorizontal
 
-from pynotas.parser import _add2default, generico
-from pynotas.utils import (
+from pynotas.parser import (
     SEPARADORES_NU,
-    LinhaPlanilha,
-    almost_equal,
+    ProcessedDataType,
     get_next,
     get_next_text,
     get_text,
+    montar_planilha,
+    processar_dados,
     to_dec,
+    to_dt,
 )
+
+if TYPE_CHECKING:
+    from pynotas.utils import LinhaPlanilha
 
 
 def data_pregao(dp_texto: str) -> dt.datetime:
     dp_texto = dp_texto.split("\n")[1]
-    ano, mes, dia = map(int, dp_texto.split("/")[::-1])
-    return dt.datetime(ano, mes, dia, tzinfo=tz.utc)
+    return to_dt(dp_texto)
 
 
 def ativo(
@@ -92,6 +94,12 @@ def _add_dec2list(
         adl_contador += 1
 
 
+def generico(
+    g_elementos: Iterator["LTTextBoxHorizontal"], g_vezes: int = 1
+) -> "dec.Decimal":
+    return abs(to_dec(get_next_text(g_elementos, g_vezes)))
+
+
 def quantidade(
     q_elementos: Iterator["LTTextBoxHorizontal"],
     q_flag: int,
@@ -142,90 +150,6 @@ def liquido(l_elementos: Iterator["LTTextBoxHorizontal"]) -> dec.Decimal:
     return abs(to_dec(get_next_text(l_elementos).split()[0]))
 
 
-def montar_dados_nota(
-    mdn_ativos: list[str],
-    mdn_tipos: list[str],
-    mdn_quantidades: list[dec.Decimal],
-    mdn_precos: list[dec.Decimal],
-    mdn_totais: list[dec.Decimal],
-) -> Mapping[str, Mapping[str, list[dec.Decimal]]]:
-    mdn_dados_nota: MutableMapping[str, MutableMapping[str, list[dec.Decimal]]] = {}
-    for mdn_indice_nota, mdn_nome_nota in enumerate(mdn_ativos):
-        mdn_dic_nota = mdn_dados_nota.setdefault(mdn_nome_nota, {})
-        mdn_dic_nota["tipo"] = mdn_tipos[mdn_indice_nota]  # type:ignore[assignment]
-        _add2default(mdn_dic_nota, "quantidade", mdn_quantidades[mdn_indice_nota])
-        _add2default(mdn_dic_nota, "preco_sem_taxa", mdn_precos[mdn_indice_nota])
-        _add2default(mdn_dic_nota, "total_sem_taxa", mdn_totais[mdn_indice_nota])
-    return mdn_dados_nota
-
-
-def montar_dados_processados(
-    mdp_dados_nota: Mapping[str, Mapping[str, list[dec.Decimal]]]
-) -> Mapping[str, MutableMapping[str, dec.Decimal]]:
-    mdp_dados_processados: MutableMapping[str, MutableMapping[str, dec.Decimal]] = {}
-    for mdp_nome_nota, mdp_ativo_nota in mdp_dados_nota.items():
-        mdp_dic_processado = mdp_dados_processados.setdefault(mdp_nome_nota, {})
-        mdp_dic_processado["tipo"] = mdp_ativo_nota["tipo"]  # type:ignore[assignment]
-        mdp_dic_processado["quantidade"] = sum(
-            # type: ignore[assignment]
-            mdp_ativo_nota["quantidade"]
-        )
-        mdp_total_processado = dec.Decimal(0)
-        for mdp_indice, mdp_quantidade_nota in enumerate(mdp_ativo_nota["quantidade"]):
-            mdp_total_processado += (
-                mdp_quantidade_nota * mdp_ativo_nota["preco_sem_taxa"][mdp_indice]
-            )
-        if mdp_total_processado != sum(mdp_ativo_nota["total_sem_taxa"]):
-            print(
-                f"{mdp_nome_nota=}, {mdp_total_processado=}, "
-                f"{sum(mdp_ativo_nota['total'])=}"
-            )
-            raise SystemError("mdp_total_processado != sum(mdp_ativo_nota['total'])")
-        mdp_dic_processado["preco_sem_taxa"] = (
-            mdp_total_processado / mdp_dic_processado["quantidade"]
-        )
-        mdp_dic_processado["total_sem_taxa"] = mdp_total_processado
-    return mdp_dados_processados
-
-
-def _assert_data_found(
-    data_nota: dt.datetime,
-    contador: int,
-    ativos: list[str],
-    tipos: list[str],
-    quantidades: list[dec.Decimal],
-    precos: list[dec.Decimal],
-    totais: list[dec.Decimal],
-    taxa_liquidacao: dec.Decimal,
-    taxa_emolumento: dec.Decimal,
-    nota_total_sem_taxa: dec.Decimal,
-    nota_total_com_taxa: dec.Decimal,
-) -> None:
-
-    if data_nota == dt.datetime(1970, 1, 1):
-        raise SystemError("data_nota not found in PDF")
-    if contador < 1:
-        raise SystemError("no assets in PDF?")
-    if len(ativos) == 0:
-        raise SystemError("no assets in PDF?")
-    if len(tipos) == 0:
-        raise SystemError("no types in PDF?")
-    if len(quantidades) == 0:
-        raise SystemError("no quantities in PDF?")
-    if len(precos) == 0:
-        raise SystemError("no prices in PDF?")
-    if len(totais) == 0:
-        raise SystemError("no totals in PDF?")
-    if taxa_liquidacao < 0:
-        raise SystemError("no liquidation fee in PDF?")
-    if taxa_emolumento < 0:
-        raise SystemError("no emolument fee in PDF?")
-    if nota_total_sem_taxa < 0:
-        raise SystemError("no total without fee in PDF?")
-    if nota_total_com_taxa < 0:
-        raise SystemError("no total with fee in PDF?")
-
-
 def _alternative(
     a_elements: Iterator["LTTextBoxHorizontal"],
 ) -> tuple[list[str] | None, list[str], int, str]:
@@ -253,7 +177,8 @@ def _alternative(
             a_counter += 1
 
 
-def read_nu(file_path: pathlib.Path) -> Sequence[LinhaPlanilha]:
+def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
+
     versao: int | None = None
     data_nota = dt.datetime(1970, 1, 1)
     contador = 0
@@ -267,8 +192,8 @@ def read_nu(file_path: pathlib.Path) -> Sequence[LinhaPlanilha]:
     taxa_emolumento = dec.Decimal(-1)
     nota_total_sem_taxa = dec.Decimal(-1)
     nota_total_com_taxa = dec.Decimal(-1)
-    planilha: list[LinhaPlanilha] = []
-    dados_processados: Mapping[str, MutableMapping[str, dec.Decimal]] = {}
+    planilha: list["LinhaPlanilha"] = []
+    dados_processados: ProcessedDataType = {}
 
     for page_layout in extract_pages(file_path):
         try:
@@ -279,14 +204,10 @@ def read_nu(file_path: pathlib.Path) -> Sequence[LinhaPlanilha]:
                 elemento = get_next(elementos)
                 if isinstance(elemento, LTTextBoxHorizontal):
                     texto = get_text(elemento)
-                    # while True:
-                    #     texto = get_next_text(elementos)
-                    #     print(">>>", texto)
                     if "Data Pregão" in texto:
                         data_nota = data_pregao(texto)
                     elif "C/VC/V" in texto:
                         texto = get_next_text(elementos)
-                        # aprint(elementos)
                         while texto != "C":
                             texto = get_next_text(elementos)
                             if texto == "Valor/Ajuste D/CD/C\nValor/Ajuste":
@@ -335,76 +256,20 @@ def read_nu(file_path: pathlib.Path) -> Sequence[LinhaPlanilha]:
                     elif "Líquido para" in texto:
                         nota_total_com_taxa = liquido(elementos)  # Liquido
         except StopIteration:
-            if len(ativos) != contador:
-                print(f"{len(ativos)=}, {contador=}")
-                raise SystemError("len(ativos) != contador")
-            dados_nota = montar_dados_nota(ativos, tipos, quantidades, precos, totais)
-            dados_processados = montar_dados_processados(dados_nota)
-            total_sem_taxa = sum(
-                processado["total_sem_taxa"]
-                for processado in dados_processados.values()
+            dados_processados = processar_dados(
+                contador,
+                ativos,
+                tipos,
+                quantidades,
+                precos,
+                totais,
+                taxa_liquidacao,
+                taxa_emolumento,
+                nota_total_sem_taxa,
+                nota_total_com_taxa,
             )
-            if not almost_equal(
-                total_sem_taxa, nota_total_sem_taxa  # type:ignore[arg-type]
-            ):
-                raise SystemError("total_sem_taxa != nota_total_sem_taxa")
-            total_taxa = taxa_liquidacao + taxa_emolumento
-            total_com_taxa = total_sem_taxa + total_taxa
-            if not almost_equal(total_com_taxa, nota_total_com_taxa):
-                print(f"{total_com_taxa=}, {nota_total_com_taxa=}")
-                raise SystemError("total_com_taxa != nota_total_com_taxa")
-            soma_final = dec.Decimal(0)
-            for valores_processados in dados_processados.values():
-                porcentagem = valores_processados["total_sem_taxa"] / total_sem_taxa
-                taxa_ativo_total = porcentagem * total_taxa
-                taxa_ativo_unitario = (
-                    taxa_ativo_total / valores_processados["quantidade"]
-                )
-                valores_processados["taxa_unitaria"] = taxa_ativo_unitario
-                valores_processados["taxa_total"] = taxa_ativo_total
-                valores_processados["preco_com_taxa"] = (
-                    valores_processados["preco_sem_taxa"] + taxa_ativo_unitario
-                )
-                valores_processados["total_com_taxa"] = (
-                    valores_processados["total_sem_taxa"] + taxa_ativo_total
-                )
-                soma_parcial = (
-                    valores_processados["quantidade"]
-                    * valores_processados["preco_com_taxa"]
-                )
-                if not almost_equal(
-                    soma_parcial, valores_processados["total_com_taxa"]
-                ):
-                    print(f"{soma_parcial=}, {valores_processados['total_com_taxa']=}")
-                    raise SystemError(
-                        "soma_parcial != valores_processados['total_com_taxa']"
-                    )
-                if almost_equal(
-                    taxa_ativo_unitario * valores_processados["quantidade"],
-                    valores_processados["preco_sem_taxa"],
-                ):
-                    # TODO pra que serve isso?
-                    print(
-                        f"{taxa_ativo_unitario * valores_processados['quantidade']=}, "
-                        f"{valores_processados['preco_sem_taxa']=}"
-                    )
-                    raise SystemError(
-                        "taxa_ativo_unitario * valores_processados['quantidade'] "
-                        "== valores_processados['preco_sem_taxa']"
-                    )
-                soma_final += soma_parcial
 
-            soma_taxa_por_ativo = sum(
-                taxa_processados["taxa_total"]
-                for taxa_processados in dados_processados.values()
-            )
-            if not almost_equal(
-                soma_taxa_por_ativo, total_taxa  # type:ignore[arg-type]
-            ):
-                print(f"{soma_taxa_por_ativo=}, {total_taxa=}")
-                raise SystemError("soma_taxa_por_ativo != total_taxa")
-
-        _assert_data_found(
+        montar_planilha(
             data_nota,
             contador,
             ativos,
@@ -416,26 +281,7 @@ def read_nu(file_path: pathlib.Path) -> Sequence[LinhaPlanilha]:
             taxa_emolumento,
             nota_total_sem_taxa,
             nota_total_com_taxa,
+            dados_processados,
+            planilha,
         )
-
-        for nome, dados in dados_processados.items():
-            planilha.append(
-                LinhaPlanilha(
-                    data=data_nota,
-                    ativo=nome,
-                    tipo=dados["tipo"],  # type:ignore[typeddict-item]
-                    local="Brasil",
-                    corretora="Nu",
-                    quantidade=dados["quantidade"],
-                    taxa_ativo=dec.Decimal(0),
-                    quantidade_final=dados["quantidade"],
-                    preco=dados["preco_sem_taxa"],
-                    taxa_unitaria=dados["taxa_unitaria"],
-                    preco_medio=dados["preco_com_taxa"],
-                    preco_total=dados["total_sem_taxa"],
-                    taxa_total=dados["taxa_total"],
-                    total_investido=dados["total_com_taxa"],
-                    total_investido_em_real=dados["total_com_taxa"],
-                )
-            )
     return planilha
