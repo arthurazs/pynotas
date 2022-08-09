@@ -3,9 +3,8 @@ import os
 import pathlib
 from typing import Callable, Mapping, Sequence, TypedDict
 
-from pynotas.nu import read_nu
-from pynotas.utils import CABECALHO, DECIMAL2STR, LinhaPlanilha, assert1page
-from pynotas.xp import read_xp
+from pynotas import read_avenue, read_nu, read_xp
+from pynotas.utils import CABECALHO, LinhaPlanilha, assert1page
 
 OptionsType = TypedDict(
     "OptionsType",
@@ -16,6 +15,7 @@ BASE_PATH = pathlib.Path("data")
 OPTIONS: Mapping[str, OptionsType] = {
     "xp": {"path": BASE_PATH / "xp", "code": read_xp},
     "nu": {"path": BASE_PATH / "nu", "code": read_nu},
+    "avenue": {"path": BASE_PATH / "avenue", "code": read_avenue},
 }
 
 
@@ -38,16 +38,11 @@ def run() -> None:
                 print(f"Lendo nota {index+1:02} {file_name}...", end=" ")
                 file_path = path / file_name
 
-                assert1page(file_path)
+                if name != "avenue":
+                    assert1page(file_path)
                 linhas_planilha = code(file_path)
                 print(f"Salvando nota {index+1:02}...", end=" ")
                 for linha in linhas_planilha:
-                    linha["data"] = str(linha["data"])[:-6]
-                    # TODO change `linha` from TypedDict to MutableMapping
-                    for header in DECIMAL2STR:
-                        linha[header] = str(  # type: ignore[literal-required]
-                            linha.get(header)
-                        ).replace(".", ",")
                     csv_writer.writerow(linha)
                 print("Salvo!")
         print("Fim.")

@@ -38,6 +38,8 @@ def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
             print(">>>", get_next_text(elements))
         except StopIteration:
             exit()
+        except AttributeError:
+            continue
 
 
 def _add2default(
@@ -216,6 +218,10 @@ def processar_dados(
     return pd_dados_processados
 
 
+def _dec2str(value: dec.Decimal) -> str:
+    return str(value).replace(",", "").replace(".", ",").strip("0")
+
+
 def montar_planilha(
     mp_data_nota: dt.datetime,
     mp_contador: int,
@@ -248,20 +254,19 @@ def montar_planilha(
     for mp_nome, mp_dados in mp_dados_processados.items():
         mp_planilha.append(
             LinhaPlanilha(
-                data=mp_data_nota,
+                data=f"{mp_data_nota:%d/%m/%Y}",
                 ativo=mp_nome,
                 tipo=mp_dados["tipo"],  # type:ignore[typeddict-item]
                 local="Brasil",
                 corretora="XP",
-                quantidade=mp_dados["quantidade"],
-                taxa_ativo=dec.Decimal(0),
-                quantidade_final=mp_dados["quantidade"],
-                preco=mp_dados["preco_sem_taxa"],
-                taxa_unitaria=mp_dados["taxa_unitaria"],
-                preco_medio=mp_dados["preco_com_taxa"],
-                preco_total=mp_dados["total_sem_taxa"],
-                taxa_total=mp_dados["taxa_total"],
-                total_investido=mp_dados["total_com_taxa"],
-                total_investido_em_real=mp_dados["total_com_taxa"],
+                quantidade=_dec2str(mp_dados["quantidade"]),
+                taxa_ativo="0",
+                quantidade_final=_dec2str(mp_dados["quantidade"]),
+                preco=_dec2str(mp_dados["preco_sem_taxa"]),
+                taxa_unitaria=_dec2str(mp_dados["taxa_unitaria"]),
+                preco_medio=_dec2str(mp_dados["preco_com_taxa"]),
+                preco_total=_dec2str(mp_dados["total_sem_taxa"]),
+                taxa_total=_dec2str(mp_dados["taxa_total"]),
+                total_investido=_dec2str(mp_dados["total_com_taxa"]),
             )
         )

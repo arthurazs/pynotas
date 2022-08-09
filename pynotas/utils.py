@@ -22,7 +22,6 @@ DECIMAL2STR: Final[Sequence[str]] = (
     "preco_total",
     "taxa_total",
     "total_investido",
-    "total_investido_em_real",
 )
 CABECALHO: Final[Sequence[str]] = (
     "data",
@@ -35,21 +34,20 @@ CABECALHO: Final[Sequence[str]] = (
 
 
 class LinhaPlanilha(TypedDict):
-    data: dt.datetime | str
+    data: str
     ativo: str
     tipo: str
     local: str
     corretora: str
-    quantidade: dec.Decimal
-    taxa_ativo: dec.Decimal
-    quantidade_final: dec.Decimal
-    preco: dec.Decimal
-    taxa_unitaria: dec.Decimal
-    preco_medio: dec.Decimal
-    preco_total: dec.Decimal
-    taxa_total: dec.Decimal
-    total_investido: dec.Decimal
-    total_investido_em_real: dec.Decimal
+    quantidade: str
+    taxa_ativo: str
+    quantidade_final: str
+    preco: str
+    taxa_unitaria: str
+    preco_medio: str
+    preco_total: str
+    taxa_total: str
+    total_investido: str
 
 
 def eprint(*args: Any) -> None:
@@ -59,12 +57,19 @@ def eprint(*args: Any) -> None:
     exit()
 
 
-def almost_equal(a: AnyNumber, b: AnyNumber) -> bool:
-    return abs(a - b) <= FLOATING_ERROR_PRECISION
+def almost_equal(
+    a: AnyNumber, b: AnyNumber, precision: dec.Decimal = FLOATING_ERROR_PRECISION
+) -> bool:
+    return abs(a - b) <= precision
 
 
-def assert_almost_equal(a: AnyNumber, b: AnyNumber, text: str = "") -> None:
-    if not almost_equal(a, b):
+def assert_almost_equal(
+    a: AnyNumber,
+    b: AnyNumber,
+    text: str = "",
+    precision: dec.Decimal = FLOATING_ERROR_PRECISION,
+) -> None:
+    if not almost_equal(a, b, precision):
         print(f"\n{a=}\n{b=}")
         raise SystemError(f"[{text}] a != b")
 
