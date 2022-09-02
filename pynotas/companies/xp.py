@@ -180,5 +180,6 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
             nota_total_com_taxa,
             dados_processados,
             planilha,
+            "XP",
         )
     return planilha

@@ -3,14 +3,20 @@
 Running:
 
 ```bash
-user@host$ poetry update
+user@host$ poetry install
 user@host$ poetry run pynotas
 ```
 
-## Supports
+## Done
 
-- XP
-- NuInvest
+- [x] XP
+- [x] NuInvest
+
+## Doing
+
+- [ ] Avenue
+  - [x] Buy
+  - [ ] Sell
 
 ## TODO
 

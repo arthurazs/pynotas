@@ -19,34 +19,35 @@ OPTIONS: Mapping[str, OptionsType] = {
 }
 
 
-def run() -> None:
+def cli() -> None:
 
-    for name, option in OPTIONS.items():
+    with open(BASE_PATH / "all.csv", "w") as all_file:
+        csv_all = csv.DictWriter(all_file, CABECALHO, dialect="unix")
+        csv_all.writeheader()
 
-        path = option["path"]
-        code = option["code"]
+        for name, option in OPTIONS.items():
 
-        print(f"\n{name} selecionado.")
-        print("Lendo notas...")
+            path = option["path"]
+            code = option["code"]
 
-        with open(path.parent / (name + ".csv"), "w") as csv_file:
-            csv_writer = csv.DictWriter(csv_file, CABECALHO, dialect="unix")
-            csv_writer.writeheader()
-            for index, file_name in enumerate(sorted(os.listdir(path))):
-                if file_name == ".gitkeep":
-                    continue
-                print(f"Lendo nota {index+1:02} {file_name}...", end=" ")
-                file_path = path / file_name
+            print(f"\n{name} selecionado.")
+            print("Lendo notas...")
 
-                if name != "avenue":
-                    assert1page(file_path)
-                linhas_planilha = code(file_path)
-                print(f"Salvando nota {index+1:02}...", end=" ")
-                for linha in linhas_planilha:
-                    csv_writer.writerow(linha)
-                print("Salvo!")
-        print("Fim.")
+            with open(path.parent / (name + ".csv"), "w") as csv_file:
+                csv_writer = csv.DictWriter(csv_file, CABECALHO, dialect="unix")
+                csv_writer.writeheader()
+                for index, file_name in enumerate(sorted(os.listdir(path))):
+                    if file_name == ".gitkeep":
+                        continue
+                    print(f"Lendo nota {index+1:02} {file_name}...", end=" ")
+                    file_path = path / file_name
 
-
-if __name__ == "__main__":
-    run()
+                    if name != "avenue":
+                        assert1page(file_path)
+                    linhas_planilha = code(file_path)
+                    print(f"Salvando nota {index+1:02}...", end=" ")
+                    for linha in linhas_planilha:
+                        csv_writer.writerow(linha)
+                        csv_all.writerow(linha)
+                    print("Salvo!")
+            print("Fim.")

@@ -283,5 +283,6 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
             nota_total_com_taxa,
             dados_processados,
             planilha,
+            "Nu",
         )
     return planilha

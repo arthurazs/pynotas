@@ -236,6 +236,7 @@ def montar_planilha(
     mp_nota_total_com_taxa: dec.Decimal,
     mp_dados_processados: ProcessedDataType,
     mp_planilha: list[LinhaPlanilha],
+    mp_local: str,
 ) -> None:
     _assert_data_found(
         mp_data_nota,
@@ -258,7 +259,7 @@ def montar_planilha(
                 ativo=mp_nome,
                 tipo=mp_dados["tipo"],  # type:ignore[typeddict-item]
                 local="Brasil",
-                corretora="XP",
+                corretora=mp_local,
                 quantidade=_dec2str(mp_dados["quantidade"]),
                 taxa_ativo="0",
                 quantidade_final=_dec2str(mp_dados["quantidade"]),

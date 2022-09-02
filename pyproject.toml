@@ -62,4 +62,4 @@ fail_under = 80
 sort = "cover"
 
 [tool.poetry.scripts]
-pynotas = 'pynotas.__main__:run'
+pynotas = 'pynotas.__main__:cli'
