@@ -43,7 +43,7 @@ CABECALHO: Final[Sequence[str]] = (
 def eprint(*args: Any) -> None:
     logger.info("eprint: ")
     for index, arg in enumerate(args):
-        logger.info(f"eprint: {index} {arg}")
+        logger.info("eprint: %d %s", index, arg)
     sys.exit()
 
 
@@ -60,7 +60,7 @@ def assert_almost_equal(
     precision: dec.Decimal = FLOATING_ERROR_PRECISION,
 ) -> None:
     if not almost_equal(a, b, precision):
-        logger.error(f"\n{a=}\n{b=}")
+        logger.error("\na=%f\nb=%f", a, b)
         msg = f"[{text}] a != b"
         raise SystemError(msg)
 

@@ -39,7 +39,7 @@ def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
     logger.info("aprint: ")
     while True:
         try:
-            logger.info(f"aprint: >>> {get_next_text(elements)}")
+            logger.info("aprint: >>> %s", get_next_text(elements))
         except StopIteration:
             sys.exit()
         except AttributeError:
@@ -117,10 +117,7 @@ def montar_dados_processados(
                 mdp_quantidade_nota * mdp_ativo_nota["preco_sem_taxa"][mdp_indice]
             )
         if mdp_total_processado != sum(mdp_ativo_nota["total_sem_taxa"]):
-            logger.error(
-                f"{mdp_nome_nota=}, {mdp_total_processado=}, "
-                f"{sum(mdp_ativo_nota['total'])=}"
-            )
+            logger.error("mdp_nome_nota=%s, mdp_total_processado=%f, sum(mdp_ativo_nota['total'])=%f", mdp_nome_nota, mdp_total_processado, sum(mdp_ativo_nota['total']))
             msg = "mdp_total_processado != sum(mdp_ativo_nota['total'])"
             raise SystemError(msg)
         mdp_dic_processado["preco_sem_taxa"] = (
@@ -162,10 +159,7 @@ def pos_processamento(
             pp_valores_processados["preco_sem_taxa"],
         ):
             # TODO pra que serve isso?
-            logger.error(
-                f"{pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=}, "
-                f"{pp_valores_processados['preco_sem_taxa']=}"
-            )
+            logger.error("pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=%f, pp_valores_processados['preco_sem_taxa']=%f", pp_taxa_ativo_unitario * pp_valores_processados['quantidade'], pp_valores_processados['preco_sem_taxa'])
             msg = (
                 "pp_taxa_ativo_unitario * pp_valores_processados['quantidade'] "
                 "== pp_valores_processados['preco_sem_taxa']"
