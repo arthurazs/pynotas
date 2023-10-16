@@ -26,10 +26,12 @@ show_error_codes = true
 enable_error_code = "ignore-without-code"
 #exclude = ["venv"]
 
-[tool.coverage.report]
-show_missing = true
-skip_empty = true
-fail_under = 80
+[tool.ruff]
+select = ["ALL"]
+#ignore = ["CPY001", "ERA001", "F401", "PERF203", "TD", "FIX", "D", "FA102"]
+ignore = ["FA102"]
+line-length = 120
+preview = true
 
 [tool.poetry.scripts]
 pynotas = 'pynotas.__main__:cli'

@@ -51,13 +51,13 @@ def cli() -> None:
                 for index, file_name in enumerate(sorted(os.listdir(path))):
                     if file_name == ".gitkeep":
                         continue
-                    logger.info("Lendo nota %02d %s...", index+1, file_name)
+                    logger.info("Lendo nota %02d %s...", index + 1, file_name)
                     file_path = path / file_name
 
                     if name != "avenue":
                         assert1page(file_path)
                     linhas_planilha = code(file_path)
-                    logger.info("Salvando nota %02d...", index+1)
+                    logger.info("Salvando nota %02d...", index + 1)
                     for linha in linhas_planilha:
                         csv_writer.writerow(linha)
                         csv_all.writerow(linha)
