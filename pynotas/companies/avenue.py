@@ -174,7 +174,7 @@ def _assert_list(
     if len(al_data) == 0:
         msg = f"no {al_name} in PDF?"
         raise SystemError(msg)
-    elif len(al_data) != al_size:
+    elif len(al_data) != al_size:  # noqa: RET506
         msg = f"missing {al_name} in PDF...\nExpected {al_size}, got {len(al_data)}"
         raise SystemError(msg)
 
@@ -250,7 +250,7 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: 
                         if "Apex Clearing Corporation" in text:
                             flag_v2 = True
                             continue
-                        elif "Confirmation Date  :  " in text:
+                        elif "Confirmation Date  :  " in text:  # noqa: RET507
                             flag_v1 = True
                     elif flag_v2:
                         if text == "B/S Trade Date Settle Date QTY":
