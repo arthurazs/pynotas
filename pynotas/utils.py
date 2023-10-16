@@ -40,7 +40,7 @@ CABECALHO: Final[Sequence[str]] = (
 )
 
 
-def eprint(*args: Any) -> None:
+def eprint(*args: Any) -> None:  # noqa: ANN401
     logger.info("eprint: ")
     for index, arg in enumerate(args):
         logger.info("eprint: %d %s", index, arg)
