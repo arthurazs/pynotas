@@ -163,10 +163,7 @@ def get_data_v1(
 
 
 def get_types(gt_tickers: list[str]) -> list[TickerType]:
-    gt_types = []
-    for gt_ticker in gt_tickers:
-        gt_types.append(TICKER2TYPE[gt_ticker])
-    return gt_types
+    return [TICKER2TYPE[gt_ticker] for gt_ticker in gt_tickers]
 
 
 def _assert_list(

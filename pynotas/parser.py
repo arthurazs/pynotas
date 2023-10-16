@@ -4,15 +4,13 @@ from typing import TYPE_CHECKING, Iterator, Mapping, MutableMapping, Sequence
 
 import pytz as tz
 
-from pynotas.models import LinhaPlanilha, Planilha
-
 if TYPE_CHECKING:
     from pdfminer.layout import LTTextBoxHorizontal
 
 import logging
 import sys
 
-from pynotas.models import LinhaPlanilha, ProcessedDataType
+from pynotas.models import LinhaPlanilha, Planilha, ProcessedDataType
 from pynotas.utils import (
     _assert_data_found,
     almost_equal,
@@ -39,13 +37,11 @@ SEPARADORES_NU: Sequence[tuple[str | None, int]] = (
 
 def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
     logger.info("aprint: ")
-    while True:
-        try:
+    try:
+        while True:
             logger.info("aprint: >>> %s", get_next_text(elements))
-        except StopIteration:
-            sys.exit()
-        except AttributeError:
-            continue
+    except StopIteration:
+        sys.exit()
 
 
 def _add2default(

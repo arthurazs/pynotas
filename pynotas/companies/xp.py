@@ -43,10 +43,7 @@ def data_pregao(dp_elementos: Iterator["LTTextBoxHorizontal"]) -> dt.datetime:
 
 
 def _lista_decimal(ld_texto: str) -> list["dec.Decimal"]:
-    ld_lista = []
-    for ld_decimal in ld_texto.split():
-        ld_lista.append(to_dec(ld_decimal))
-    return ld_lista
+    return [to_dec(ld_decimal) for ld_decimal in ld_texto.split()]
 
 
 def ativo(a_elementos: Iterator["LTTextBoxHorizontal"]) -> tuple[list[str], list[str]]:
