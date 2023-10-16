@@ -17,10 +17,11 @@ except IndexError:
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
-OptionsType = TypedDict(
-    "OptionsType",
-    {"path": pathlib.Path, "code": Callable[[pathlib.Path], Sequence[LinhaPlanilha]]},
-)
+
+class OptionsType(TypedDict):
+    path: pathlib.Path
+    code: Callable[[pathlib.Path], Sequence[LinhaPlanilha]]
+
 
 BASE_PATH = pathlib.Path("data")
 OPTIONS: Mapping[str, OptionsType] = {
