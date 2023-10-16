@@ -64,9 +64,7 @@ def to_dec(t_number: str) -> dec.Decimal:
     return dec.Decimal(t_number.replace(".", "").replace(",", "."))
 
 
-def get_next(
-    gn_elements: Iterator["LTTextBoxHorizontal"], gn_times: int = 1
-) -> "LTTextBoxHorizontal":
+def get_next(gn_elements: Iterator["LTTextBoxHorizontal"], gn_times: int = 1) -> "LTTextBoxHorizontal":
     for _ in range(gn_times - 1):
         next(gn_elements)
     return next(gn_elements)
@@ -76,9 +74,7 @@ def get_text(gt_element: "LTTextBoxHorizontal") -> str:
     return gt_element.get_text().strip()
 
 
-def get_next_text(
-    gnt_elements: Iterator["LTTextBoxHorizontal"], gnt_times: int = 1
-) -> str:
+def get_next_text(gnt_elements: Iterator["LTTextBoxHorizontal"], gnt_times: int = 1) -> str:
     gnt_element = get_next(gnt_elements, gnt_times)
     return get_text(gnt_element)
 
@@ -100,16 +96,14 @@ def montar_dados_nota(
     return mdn_dados_nota
 
 
-def montar_dados_processados(
-    mdp_dados_nota: Mapping[str, Mapping[str, list[dec.Decimal]]]
-) -> ProcessedDataType:
+def montar_dados_processados(mdp_dados_nota: Mapping[str, Mapping[str, list[dec.Decimal]]]) -> ProcessedDataType:
     mdp_dados_processados: MutableMapping[str, MutableMapping[str, dec.Decimal]] = {}
     for mdp_nome_nota, mdp_ativo_nota in mdp_dados_nota.items():
         mdp_dic_processado = mdp_dados_processados.setdefault(mdp_nome_nota, {})
         mdp_dic_processado["tipo"] = mdp_ativo_nota["tipo"]  # type:ignore[assignment]
         mdp_dic_processado["quantidade"] = sum(
             # type: ignore[assignment]
-            mdp_ativo_nota["quantidade"]
+            mdp_ativo_nota["quantidade"],
         )
         mdp_total_processado = dec.Decimal(0)
         for mdp_indice, mdp_quantidade_nota in enumerate(mdp_ativo_nota["quantidade"]):
@@ -151,15 +145,18 @@ def pos_processamento(
             pp_valores_processados["quantidade"]
             * pp_valores_processados["preco_com_taxa"]
         )
-        assert_almost_equal(
-            pp_soma_parcial, pp_valores_processados["total_com_taxa"], "parcial-taxa"
-        )
+        assert_almost_equal(pp_soma_parcial, pp_valores_processados["total_com_taxa"], "parcial-taxa")
         if almost_equal(
             pp_taxa_ativo_unitario * pp_valores_processados["quantidade"],
             pp_valores_processados["preco_sem_taxa"],
         ):
             # TODO pra que serve isso?
-            logger.error("pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=%f, pp_valores_processados['preco_sem_taxa']=%f", pp_taxa_ativo_unitario * pp_valores_processados['quantidade'], pp_valores_processados['preco_sem_taxa'])
+            logger.error(
+                "pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=%f, "
+                "pp_valores_processados['preco_sem_taxa']=%f",
+                pp_taxa_ativo_unitario * pp_valores_processados['quantidade'],
+                pp_valores_processados['preco_sem_taxa'],
+            )
             msg = (
                 "pp_taxa_ativo_unitario * pp_valores_processados['quantidade'] "
                 "== pp_valores_processados['preco_sem_taxa']"
@@ -168,13 +165,11 @@ def pos_processamento(
         pp_soma_final += pp_soma_parcial
 
 
-def processar_dados(
-    planilha: "Planilha",
-) -> ProcessedDataType:
+def processar_dados(planilha: "Planilha") -> ProcessedDataType:
 
     assert_almost_equal(len(planilha.ativos), planilha.contador, "contador")
     pd_dados_nota = montar_dados_nota(
-        planilha.ativos, planilha.tipos, planilha.quantidades, planilha.precos, planilha.totais
+        planilha.ativos, planilha.tipos, planilha.quantidades, planilha.precos, planilha.totais,
     )
     pd_dados_processados = montar_dados_processados(pd_dados_nota)
     pd_total_sem_taxa = sum(
@@ -238,5 +233,5 @@ def montar_planilha(
                 preco_total=_dec2str(mp_dados["total_sem_taxa"]),
                 taxa_total=_dec2str(mp_dados["taxa_total"]),
                 total_investido=_dec2str(mp_dados["total_com_taxa"]),
-            )
+            ),
         )

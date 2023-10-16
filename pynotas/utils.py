@@ -47,9 +47,7 @@ def eprint(*args: Any) -> None:
     sys.exit()
 
 
-def almost_equal(
-    a: "AnyNumber", b: "AnyNumber", precision: dec.Decimal = FLOATING_ERROR_PRECISION
-) -> bool:
+def almost_equal(a: "AnyNumber", b: "AnyNumber", precision: dec.Decimal = FLOATING_ERROR_PRECISION) -> bool:
     return abs(a - b) <= precision
 
 

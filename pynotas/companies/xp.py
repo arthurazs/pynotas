@@ -27,16 +27,12 @@ def _dec_split(ds_texto: str, ds_indice: int) -> "dec.Decimal":
     return to_dec(ds_texto.split()[ds_indice])
 
 
-def _dec_split_next(
-    dsn_elementos: Iterator["LTTextBoxHorizontal"], dsn_indice: int
-) -> "dec.Decimal":
+def _dec_split_next(dsn_elementos: Iterator["LTTextBoxHorizontal"], dsn_indice: int) -> "dec.Decimal":
     dsn_texto = get_next_text(dsn_elementos)
     return to_dec(dsn_texto.split()[dsn_indice])
 
 
-def _next_lista_decimal(
-    nld_elementos: Iterator["LTTextBoxHorizontal"], nld_vezes: int = 1
-) -> list["dec.Decimal"]:
+def _next_lista_decimal(nld_elementos: Iterator["LTTextBoxHorizontal"], nld_vezes: int = 1) -> list["dec.Decimal"]:
     nld_texto = get_next_text(nld_elementos, nld_vezes)
     return _lista_decimal(nld_texto)
 
@@ -129,7 +125,7 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
     for page_layout in extract_pages(file_path):
         try:
             elementos: Iterator["LTTextBoxHorizontal"] = iter(
-                page_layout  # type: ignore[arg-type]
+                page_layout,  # type: ignore[arg-type]
             )
             while True:
                 elemento = get_next(elementos)
@@ -148,9 +144,7 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                         "Taxa Operacional\nExecução\n"
                         "Taxa de Custódia\nImpostos\nI.R.R.F." in texto
                     ):
-                        nota_total_sem_taxa, taxa_liquidacao = clearing(
-                            elementos
-                        )  # Clearing
+                        nota_total_sem_taxa, taxa_liquidacao = clearing(elementos)  # Clearing
                         taxa_emolumento = bolsa(elementos)  # Bolsa
                     elif "Total Custos / Despesas\nLíquido para " in texto:
                         nota_total_com_taxa = liquido(elementos)  # Liquido
@@ -166,16 +160,9 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                 taxa_liquidacao,
                 taxa_emolumento,
                 nota_total_sem_taxa,
-                nota_total_com_taxa
+                nota_total_com_taxa,
             )
-            dados_processados = processar_dados(
-                planilha,
-            )
+            dados_processados = processar_dados(planilha)
 
-        montar_planilha(
-            planilha,
-            dados_processados,
-            linhas_planilha,
-            "XP",
-        )
+        montar_planilha(planilha, dados_processados, linhas_planilha, "XP")
     return linhas_planilha

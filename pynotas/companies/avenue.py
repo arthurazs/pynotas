@@ -52,9 +52,7 @@ def get_next_decimal(gnd_elements: Iterator["LTTextBoxHorizontal"]) -> dec.Decim
             continue
 
 
-def get_next_date(
-    gnd_elements: Iterator["LTTextBoxHorizontal"], v2_flag: bool = True
-) -> dt.date:
+def get_next_date(gnd_elements: Iterator["LTTextBoxHorizontal"], v2_flag: bool = True) -> dt.date:
     while True:
         gnd_text = get_next_text(gnd_elements)
         try:
@@ -82,9 +80,7 @@ def get_ticker(gt_elements: Iterator["LTTextBoxHorizontal"]) -> str:
         return gt_text
 
 
-def get_data(
-    gd_elements: Iterator["LTTextBoxHorizontal"], gd_flag: bool = False
-) -> tuple[
+def get_data(gd_elements: Iterator["LTTextBoxHorizontal"], gd_flag: bool = False) -> tuple[
     dt.date,
     list[str],
     list[dec.Decimal],
@@ -184,14 +180,10 @@ def _assert_list(
         raise SystemError(msg)
     elif len(al_data) != al_size:
         msg = f"missing {al_name} in PDF...\nExpected {al_size}, got {len(al_data)}"
-        raise SystemError(
-            msg
-        )
+        raise SystemError(msg)
 
 
-def assert_data_found(
-    sheet: Sheet
-) -> None:
+def assert_data_found(sheet: "Sheet") -> None:
     if sheet.date == dt.date(1970, 1, 1):
         msg = "no date in PDF?"
         raise SystemError(msg)
@@ -206,13 +198,11 @@ def assert_data_found(
         _assert_list(adf_data, adf_name, sheet.counter)  # type: ignore[arg-type]
 
 
-def build_sheet(
-    sheet: "Sheet"
-) -> list[LinhaPlanilha]:
+def build_sheet(sheet: "Sheet") -> list[LinhaPlanilha]:
     bs_list = []
     zero = "0"
     for bs_action, bs_ticker, bs_type, bs_quantity, bs_price, bs_total in zip(
-        sheet.actions, sheet.tickers, sheet.types, sheet.quantities, sheet.prices, sheet.totals
+        sheet.actions, sheet.tickers, sheet.types, sheet.quantities, sheet.prices, sheet.totals,
     ):
         if bs_action == "S":
             continue
@@ -232,7 +222,7 @@ def build_sheet(
                 preco_total=_dec2str(bs_total),
                 taxa_total=zero,
                 total_investido=_dec2str(bs_total),
-            )
+            ),
         )
     return bs_list
 
@@ -253,7 +243,7 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: 
     flag_v1, flag_v2 = False, False
     for page_layout in extract_pages(file_path):
         elements: Iterator["LTTextBoxHorizontal"] = iter(
-            page_layout  # type: ignore[arg-type]
+            page_layout,  # type: ignore[arg-type]
         )
         try:
             while True:

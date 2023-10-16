@@ -28,9 +28,7 @@ def data_pregao(dp_texto: str) -> dt.datetime:
     return to_dt(dp_texto)
 
 
-def ativo(
-    a_elementos: Iterator["LTTextBoxHorizontal"], a_flag: int, a_texto: str
-) -> tuple[list[str], list[str]]:
+def ativo(a_elementos: Iterator["LTTextBoxHorizontal"], a_flag: int, a_texto: str) -> tuple[list[str], list[str]]:
 
     a_lista = []
     a_tipos = []
@@ -58,9 +56,9 @@ def ativo(
             continue
 
 
-def _add_dec2list_v2(
-    adl_elementos: Iterator["LTTextBoxHorizontal"], adl_flag: int
-) -> tuple[list[dec.Decimal], list[dec.Decimal]]:
+def _add_dec2list_v2(adl_elementos: Iterator["LTTextBoxHorizontal"], adl_flag: int) -> tuple[
+    list[dec.Decimal], list[dec.Decimal],
+]:
     adl_lista1 = []
     adl_lista2 = []
     adl_contador = 0
@@ -95,9 +93,7 @@ def _add_dec2list(
         adl_contador += 1
 
 
-def generico(
-    g_elementos: Iterator["LTTextBoxHorizontal"], g_vezes: int = 1
-) -> "dec.Decimal":
+def generico(g_elementos: Iterator["LTTextBoxHorizontal"], g_vezes: int = 1) -> "dec.Decimal":
     return abs(to_dec(get_next_text(g_elementos, g_vezes)))
 
 
@@ -109,21 +105,17 @@ def quantidade(
     return _add_dec2list(q_elementos, q_flag, q_texto)
 
 
-def preco(
-    p_elementos: Iterator["LTTextBoxHorizontal"], p_flag: int
-) -> list[dec.Decimal]:
+def preco(p_elementos: Iterator["LTTextBoxHorizontal"], p_flag: int) -> list[dec.Decimal]:
     return _add_dec2list(p_elementos, p_flag)
 
 
-def total(
-    t_elementos: Iterator["LTTextBoxHorizontal"], t_flag: int
-) -> list[dec.Decimal]:
+def total(t_elementos: Iterator["LTTextBoxHorizontal"], t_flag: int) -> list[dec.Decimal]:
     return _add_dec2list(t_elementos, t_flag)
 
 
-def preco_total(
-    p_elementos: Iterator["LTTextBoxHorizontal"], p_flag: int
-) -> tuple[list[dec.Decimal], list[dec.Decimal]]:
+def preco_total(p_elementos: Iterator["LTTextBoxHorizontal"], p_flag: int) -> tuple[
+    list[dec.Decimal], list[dec.Decimal],
+]:
     return _add_dec2list_v2(p_elementos, p_flag)
 
 
@@ -199,7 +191,7 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901
     for page_layout in extract_pages(file_path):
         try:
             elementos: Iterator["LTTextBoxHorizontal"] = iter(
-                page_layout  # type: ignore[arg-type]
+                page_layout,  # type: ignore[arg-type]
             )
             while True:
                 elemento = get_next(elementos)
@@ -212,9 +204,7 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901
                         while texto != "C":
                             texto = get_next_text(elementos)
                             if texto == "Valor/Ajuste D/CD/C\nValor/Ajuste":
-                                auxiliar, tipos, contador_alt, texto = _alternative(
-                                    elementos
-                                )
+                                auxiliar, tipos, contador_alt, texto = _alternative(elementos)
                                 if auxiliar is None:
                                     break
                                 ativos = auxiliar
@@ -245,14 +235,10 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901
                         if "Líquido para" in texto:
                             nota_total_com_taxa = liquido(elementos)  # Liquido
                             get_next(elementos)
-                            nota_total_sem_taxa, taxa_liquidacao = clearing(
-                                elementos
-                            )  # Clearing
+                            nota_total_sem_taxa, taxa_liquidacao = clearing(elementos)  # Clearing
                             taxa_emolumento = bolsa(elementos)
                     elif texto == "Outras" and versao == 1:
-                        nota_total_sem_taxa, taxa_liquidacao = clearing(
-                            elementos
-                        )  # Clearing
+                        nota_total_sem_taxa, taxa_liquidacao = clearing(elementos)  # Clearing
                         taxa_emolumento = bolsa(elementos)
                     elif "Líquido para" in texto:
                         nota_total_com_taxa = liquido(elementos)  # Liquido
@@ -270,14 +256,7 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901
                 nota_total_sem_taxa,
                 nota_total_com_taxa,
             )
-            dados_processados = processar_dados(
-                planilha
-            )
+            dados_processados = processar_dados(planilha)
 
-        montar_planilha(
-            planilha,
-            dados_processados,
-            linhas_planilha,
-            "Nu",
-        )
+        montar_planilha(planilha, dados_processados, linhas_planilha, "Nu")
     return linhas_planilha
