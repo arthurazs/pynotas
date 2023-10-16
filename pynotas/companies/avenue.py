@@ -1,20 +1,13 @@
 import datetime as dt
 import decimal as dec
 import pathlib
-from enum import Enum
 from typing import Iterator, Sequence
 
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextBoxHorizontal
 
 from pynotas.parser import _dec2str, get_next, get_next_text, get_text
-from pynotas.utils import LinhaPlanilha
-
-
-class TickerType(str, Enum):
-    stock = "Stock"
-    etf = "ETF"
-    reit = "REIT"
+from pynotas.models import LinhaPlanilha, Sheet, TickerType
 
 
 stock = TickerType.stock
@@ -197,48 +190,35 @@ def _assert_list(
 
 
 def assert_data_found(
-    adf_size: int,
-    adf_date: dt.date,
-    adf_actions: list[str],
-    adf_tickers: list[str],
-    adf_types: list[TickerType],
-    adf_quantities: list[dec.Decimal],
-    adf_prices: list[dec.Decimal],
-    adf_totals: list[dec.Decimal],
+    sheet: Sheet
 ) -> None:
-    if adf_date == dt.date(1970, 1, 1):
+    if sheet.date == dt.date(1970, 1, 1):
         msg = "no date in PDF?"
         raise SystemError(msg)
     for adf_data, adf_name in (
-        (adf_actions, "actions"),
-        (adf_tickers, "tickers"),
-        (adf_types, "types"),
-        (adf_quantities, "quantities"),
-        (adf_prices, "prices"),
-        (adf_totals, "totals"),
+        (sheet.actions, "actions"),
+        (sheet.tickers, "tickers"),
+        (sheet.types, "types"),
+        (sheet.quantities, "quantities"),
+        (sheet.prices, "prices"),
+        (sheet.totals, "totals"),
     ):
-        _assert_list(adf_data, adf_name, adf_size)  # type: ignore[arg-type]
+        _assert_list(adf_data, adf_name, sheet.counter)  # type: ignore[arg-type]
 
 
 def build_sheet(
-    bs_date: dt.date,
-    bs_actions: list[str],
-    bs_tickers: list[str],
-    bs_types: list[TickerType],
-    bs_quantities: list[dec.Decimal],
-    bs_prices: list[dec.Decimal],
-    bs_totals: list[dec.Decimal],
+    sheet: "Sheet"
 ) -> list[LinhaPlanilha]:
     bs_list = []
     zero = "0"
     for bs_action, bs_ticker, bs_type, bs_quantity, bs_price, bs_total in zip(
-        bs_actions, bs_tickers, bs_types, bs_quantities, bs_prices, bs_totals
+        sheet.actions, sheet.tickers, sheet.types, sheet.quantities, sheet.prices, sheet.totals
     ):
         if bs_action == "S":
             continue
         bs_list.append(
             LinhaPlanilha(
-                data=f"{bs_date:%d/%m/%Y}",
+                data=f"{sheet.date:%d/%m/%Y}",
                 ativo=bs_ticker,
                 tipo=bs_type,
                 local="Exterior",
@@ -257,7 +237,7 @@ def build_sheet(
     return bs_list
 
 
-def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
+def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: PLR0912, PLR0915
 
     counter = 0
     date = dt.date(1970, 1, 1)
@@ -339,7 +319,6 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
 
     if flag_v1:
         date = dates[0]
-    assert_data_found(
-        counter, date, actions, tickers, types, quantities, prices, totals
-    )
-    return build_sheet(date, actions, tickers, types, quantities, prices, totals)
+    sheet = Sheet(date, counter, actions, tickers, types, quantities, prices, totals)
+    assert_data_found(sheet)
+    return build_sheet(sheet)

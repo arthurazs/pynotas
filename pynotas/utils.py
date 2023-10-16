@@ -2,13 +2,15 @@ import pytz as tz
 import datetime as dt
 import decimal as dec
 import pathlib
-from typing import Any, Final, Sequence, TypedDict, TypeVar
+from typing import Any, Final, Sequence, TYPE_CHECKING
 
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdftypes import resolve1
+import sys
 
-AnyNumber = TypeVar("AnyNumber", int, dec.Decimal)
+if TYPE_CHECKING:
+    from pynotas.models import Planilha, AnyNumber
 
 FLOATING_ERROR_PRECISION: Final[dec.Decimal] = dec.Decimal(1e-10)
 
@@ -34,39 +36,22 @@ CABECALHO: Final[Sequence[str]] = (
 )
 
 
-class LinhaPlanilha(TypedDict):
-    data: str
-    ativo: str
-    tipo: str
-    local: str
-    corretora: str
-    quantidade: str
-    taxa_ativo: str
-    quantidade_final: str
-    preco: str
-    taxa_unitaria: str
-    preco_medio: str
-    preco_total: str
-    taxa_total: str
-    total_investido: str
-
-
 def eprint(*args: Any) -> None:
     print()
     for index, arg in enumerate(args):
         print(index, arg)
-    exit()
+    sys.exit()
 
 
 def almost_equal(
-    a: AnyNumber, b: AnyNumber, precision: dec.Decimal = FLOATING_ERROR_PRECISION
+    a: "AnyNumber", b: "AnyNumber", precision: dec.Decimal = FLOATING_ERROR_PRECISION
 ) -> bool:
     return abs(a - b) <= precision
 
 
 def assert_almost_equal(
-    a: AnyNumber,
-    b: AnyNumber,
+    a: "AnyNumber",
+    b: "AnyNumber",
     text: str = "",
     precision: dec.Decimal = FLOATING_ERROR_PRECISION,
 ) -> None:
@@ -89,49 +74,39 @@ def assert1page(file_path: pathlib.Path) -> None:
 
 
 def _assert_data_found(
-    data_nota: dt.datetime,
-    contador: int,
-    ativos: list[str],
-    tipos: list[str],
-    quantidades: list[dec.Decimal],
-    precos: list[dec.Decimal],
-    totais: list[dec.Decimal],
-    taxa_liquidacao: dec.Decimal,
-    taxa_emolumento: dec.Decimal,
-    nota_total_sem_taxa: dec.Decimal,
-    nota_total_com_taxa: dec.Decimal,
+    planilha: "Planilha"
 ) -> None:
 
-    if data_nota == dt.datetime(1970, 1, 1, tzinfo=tz.utc):
+    if planilha.data_nota == dt.datetime(1970, 1, 1, tzinfo=tz.utc):
         msg = "data_nota not found in PDF"
         raise SystemError(msg)
-    if contador < 1:
+    if planilha.contador < 1:
         msg = "no assets in PDF?"
         raise SystemError(msg)
-    if len(ativos) == 0:
+    if len(planilha.ativos) == 0:
         msg = "no assets in PDF?"
         raise SystemError(msg)
-    if len(tipos) == 0:
+    if len(planilha.tipos) == 0:
         msg = "no types in PDF?"
         raise SystemError(msg)
-    if len(quantidades) == 0:
+    if len(planilha.quantidades) == 0:
         msg = "no quantities in PDF?"
         raise SystemError(msg)
-    if len(precos) == 0:
+    if len(planilha.precos) == 0:
         msg = "no prices in PDF?"
         raise SystemError(msg)
-    if len(totais) == 0:
+    if len(planilha.totais) == 0:
         msg = "no totals in PDF?"
         raise SystemError(msg)
-    if taxa_liquidacao < 0:
+    if planilha.taxa_liquidacao < 0:
         msg = "no liquidation fee in PDF?"
         raise SystemError(msg)
-    if taxa_emolumento < 0:
+    if planilha.taxa_emolumento < 0:
         msg = "no emolument fee in PDF?"
         raise SystemError(msg)
-    if nota_total_sem_taxa < 0:
+    if planilha.nota_total_sem_taxa < 0:
         msg = "no total without fee in PDF?"
         raise SystemError(msg)
-    if nota_total_com_taxa < 0:
+    if planilha.nota_total_com_taxa < 0:
         msg = "no total with fee in PDF?"
         raise SystemError(msg)

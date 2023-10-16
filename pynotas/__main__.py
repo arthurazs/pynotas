@@ -4,7 +4,8 @@ import pathlib
 from typing import Callable, Mapping, Sequence, TypedDict
 
 from pynotas import read_avenue, read_nu, read_xp
-from pynotas.utils import CABECALHO, LinhaPlanilha, assert1page
+from pynotas.utils import CABECALHO, assert1page
+from pynotas.models import LinhaPlanilha
 
 OptionsType = TypedDict(
     "OptionsType",

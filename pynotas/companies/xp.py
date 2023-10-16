@@ -17,9 +17,10 @@ from pynotas.parser import (
     to_dec,
     to_dt,
 )
+from pynotas.models import Planilha
 
 if TYPE_CHECKING:
-    from pynotas.utils import LinhaPlanilha
+    from pynotas.models import LinhaPlanilha
 
 
 def _dec_split(ds_texto: str, ds_indice: int) -> "dec.Decimal":
@@ -123,7 +124,7 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
     taxa_emolumento = dec.Decimal(-1)
     nota_total_sem_taxa = dec.Decimal(-1)
     nota_total_com_taxa = dec.Decimal(-1)
-    planilha: list["LinhaPlanilha"] = []
+    linhas_planilha: list["LinhaPlanilha"] = []
 
     for page_layout in extract_pages(file_path):
         try:
@@ -154,7 +155,8 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                     elif "Total Custos / Despesas\nLíquido para " in texto:
                         nota_total_com_taxa = liquido(elementos)  # Liquido
         except StopIteration:
-            dados_processados = processar_dados(
+            planilha = Planilha(
+                data_nota,
                 contador,
                 ativos,
                 tipos,
@@ -164,23 +166,16 @@ def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                 taxa_liquidacao,
                 taxa_emolumento,
                 nota_total_sem_taxa,
-                nota_total_com_taxa,
+                nota_total_com_taxa
+            )
+            dados_processados = processar_dados(
+                planilha,
             )
 
         montar_planilha(
-            data_nota,
-            contador,
-            ativos,
-            tipos,
-            quantidades,
-            precos,
-            totais,
-            taxa_liquidacao,
-            taxa_emolumento,
-            nota_total_sem_taxa,
-            nota_total_com_taxa,
-            dados_processados,
             planilha,
+            dados_processados,
+            linhas_planilha,
             "XP",
         )
-    return planilha
+    return linhas_planilha

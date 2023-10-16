@@ -9,7 +9,6 @@ from pdfminer.layout import LTTextBoxHorizontal
 
 from pynotas.parser import (
     SEPARADORES_NU,
-    ProcessedDataType,
     get_next,
     get_next_text,
     get_text,
@@ -18,9 +17,10 @@ from pynotas.parser import (
     to_dec,
     to_dt,
 )
+from pynotas.models import ProcessedDataType, Planilha
 
 if TYPE_CHECKING:
-    from pynotas.utils import LinhaPlanilha
+    from pynotas.models import LinhaPlanilha
 
 
 def data_pregao(dp_texto: str) -> dt.datetime:
@@ -178,7 +178,7 @@ def _alternative(
             a_counter += 1
 
 
-def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
+def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: PLR0912, PLR0915
 
     versao: int | None = None
     data_nota = dt.datetime(1970, 1, 1, tzinfo=tz.utc)
@@ -193,7 +193,7 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
     taxa_emolumento = dec.Decimal(-1)
     nota_total_sem_taxa = dec.Decimal(-1)
     nota_total_com_taxa = dec.Decimal(-1)
-    planilha: list["LinhaPlanilha"] = []
+    linhas_planilha: list["LinhaPlanilha"] = []
     dados_processados: ProcessedDataType = {}
 
     for page_layout in extract_pages(file_path):
@@ -257,7 +257,8 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                     elif "Líquido para" in texto:
                         nota_total_com_taxa = liquido(elementos)  # Liquido
         except StopIteration:
-            dados_processados = processar_dados(
+            planilha = Planilha(
+                data_nota,
                 contador,
                 ativos,
                 tipos,
@@ -269,21 +270,14 @@ def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
                 nota_total_sem_taxa,
                 nota_total_com_taxa,
             )
+            dados_processados = processar_dados(
+                planilha
+            )
 
         montar_planilha(
-            data_nota,
-            contador,
-            ativos,
-            tipos,
-            quantidades,
-            precos,
-            totais,
-            taxa_liquidacao,
-            taxa_emolumento,
-            nota_total_sem_taxa,
-            nota_total_com_taxa,
-            dados_processados,
             planilha,
+            dados_processados,
+            linhas_planilha,
             "Nu",
         )
-    return planilha
+    return linhas_planilha

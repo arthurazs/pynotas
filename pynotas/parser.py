@@ -1,6 +1,7 @@
 import datetime as dt
 import decimal as dec
 from typing import TYPE_CHECKING, Iterator, Mapping, MutableMapping, Sequence
+from pynotas.models import LinhaPlanilha, Planilha
 
 import pytz as tz
 
@@ -8,11 +9,12 @@ if TYPE_CHECKING:
     from pdfminer.layout import LTTextBoxHorizontal
 
 from pynotas.utils import (
-    LinhaPlanilha,
     _assert_data_found,
     almost_equal,
     assert_almost_equal,
 )
+from pynotas.models import LinhaPlanilha, ProcessedDataType
+import sys
 
 SEPARADORES_XP: Sequence[tuple[str | None, int]] = (
     (" CI ER", 0),
@@ -28,7 +30,6 @@ SEPARADORES_NU: Sequence[tuple[str | None, int]] = (
     (" CI", 0),
     (None, -1),
 )
-ProcessedDataType = Mapping[str, MutableMapping[str, dec.Decimal]]
 
 
 def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
@@ -37,7 +38,7 @@ def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
         try:
             print(">>>", get_next_text(elements))
         except StopIteration:
-            exit()
+            sys.exit()
         except AttributeError:
             continue
 
@@ -171,21 +172,12 @@ def pos_processamento(
 
 
 def processar_dados(
-    pd_contador: int,
-    pd_ativos: list[str],
-    pd_tipos: list[str],
-    pd_quantidades: list[dec.Decimal],
-    pd_precos: list[dec.Decimal],
-    pd_totais: list[dec.Decimal],
-    pd_taxa_liquidacao: dec.Decimal,
-    pd_taxa_emolumento: dec.Decimal,
-    pd_nota_total_sem_taxa: dec.Decimal,
-    pd_nota_total_com_taxa: dec.Decimal,
+    planilha: "Planilha",
 ) -> ProcessedDataType:
 
-    assert_almost_equal(len(pd_ativos), pd_contador, "contador")
+    assert_almost_equal(len(planilha.ativos), planilha.contador, "contador")
     pd_dados_nota = montar_dados_nota(
-        pd_ativos, pd_tipos, pd_quantidades, pd_precos, pd_totais
+        planilha.ativos, planilha.tipos, planilha.quantidades, planilha.precos, planilha.totais
     )
     pd_dados_processados = montar_dados_processados(pd_dados_nota)
     pd_total_sem_taxa = sum(
@@ -195,12 +187,12 @@ def processar_dados(
     assert_almost_equal(
         # type: ignore[type-var]
         pd_total_sem_taxa,
-        pd_nota_total_sem_taxa,
+        planilha.nota_total_sem_taxa,
         "nota-total",
     )
-    pd_taxa_total = pd_taxa_liquidacao + pd_taxa_emolumento
+    pd_taxa_total = planilha.taxa_liquidacao + planilha.taxa_emolumento
     pd_total_com_taxa = pd_total_sem_taxa + pd_taxa_total
-    assert_almost_equal(pd_total_com_taxa, pd_nota_total_com_taxa, "nota-total-taxa")
+    assert_almost_equal(pd_total_com_taxa, planilha.nota_total_com_taxa, "nota-total-taxa")
     pos_processamento(
         pd_dados_processados,
         pd_total_sem_taxa,  # type: ignore[arg-type]
@@ -225,39 +217,17 @@ def _dec2str(value: dec.Decimal) -> str:
 
 
 def montar_planilha(
-    mp_data_nota: dt.datetime,
-    mp_contador: int,
-    mp_ativos: list[str],
-    mp_tipos: list[str],
-    mp_quantidades: list[dec.Decimal],
-    mp_precos: list[dec.Decimal],
-    mp_totais: list[dec.Decimal],
-    mp_taxa_liquidacao: dec.Decimal,
-    mp_taxa_emolumento: dec.Decimal,
-    mp_nota_total_sem_taxa: dec.Decimal,
-    mp_nota_total_com_taxa: dec.Decimal,
+    planilha: "Planilha",
     mp_dados_processados: ProcessedDataType,
-    mp_planilha: list[LinhaPlanilha],
+    mp_linhas_planilha: list[LinhaPlanilha],
     mp_local: str,
 ) -> None:
-    _assert_data_found(
-        mp_data_nota,
-        mp_contador,
-        mp_ativos,
-        mp_tipos,
-        mp_quantidades,
-        mp_precos,
-        mp_totais,
-        mp_taxa_liquidacao,
-        mp_taxa_emolumento,
-        mp_nota_total_sem_taxa,
-        mp_nota_total_com_taxa,
-    )
+    _assert_data_found(planilha)
 
     for mp_nome, mp_dados in mp_dados_processados.items():
-        mp_planilha.append(
+        mp_linhas_planilha.append(
             LinhaPlanilha(
-                data=f"{mp_data_nota:%d/%m/%Y}",
+                data=f"{planilha.data_nota:%d/%m/%Y}",
                 ativo=mp_nome,
                 tipo=mp_dados["tipo"],  # type:ignore[typeddict-item]
                 local="Brasil",
