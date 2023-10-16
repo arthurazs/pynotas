@@ -62,7 +62,7 @@ def assert_almost_equal(
 
 
 def assert1page(file_path: pathlib.Path) -> None:
-    with open(file_path, "rb") as f:
+    with file_path.open("rb") as f:
         parser = PDFParser(f)
         doc = PDFDocument(parser)
         parser.set_document(doc)

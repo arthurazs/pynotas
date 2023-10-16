@@ -22,7 +22,7 @@ OPTIONS: Mapping[str, OptionsType] = {
 
 def cli() -> None:
 
-    with open(BASE_PATH / "all.csv", "w") as all_file:
+    with (BASE_PATH / "all.csv").open("w") as all_file:
         csv_all = csv.DictWriter(all_file, CABECALHO, dialect="unix")
         csv_all.writeheader()
 
@@ -34,7 +34,7 @@ def cli() -> None:
             print(f"\n{name} selecionado.")
             print("Lendo notas...")
 
-            with open(path.parent / (name + ".csv"), "w") as csv_file:
+            with (path.parent / (name + ".csv")).open("w") as csv_file:
                 csv_writer = csv.DictWriter(csv_file, CABECALHO, dialect="unix")
                 csv_writer.writeheader()
                 for index, file_name in enumerate(sorted(os.listdir(path))):
