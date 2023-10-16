@@ -10,7 +10,7 @@ from pynotas.models import LinhaPlanilha
 from pynotas.utils import CABECALHO, assert1page
 
 try:
-    log_level = logging.INFO if sys.argv[1] == '-v' else logging.WARNING
+    log_level = logging.INFO if sys.argv[1] == "-v" else logging.WARNING
 except IndexError:
     log_level = logging.WARNING
 

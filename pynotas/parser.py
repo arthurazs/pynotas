@@ -113,7 +113,7 @@ def montar_dados_processados(mdp_dados_nota: Mapping[str, Mapping[str, list[dec.
                 mdp_quantidade_nota * mdp_ativo_nota["preco_sem_taxa"][mdp_indice]
             )
         if mdp_total_processado != sum(mdp_ativo_nota["total_sem_taxa"]):
-            logger.error("mdp_nome_nota=%s, mdp_total_processado=%f, sum(mdp_ativo_nota['total'])=%f", mdp_nome_nota, mdp_total_processado, sum(mdp_ativo_nota['total']))
+            logger.error("mdp_nome_nota=%s, mdp_total_processado=%f, sum(mdp_ativo_nota['total'])=%f", mdp_nome_nota, mdp_total_processado, sum(mdp_ativo_nota["total"]))
             msg = "mdp_total_processado != sum(mdp_ativo_nota['total'])"
             raise SystemError(msg)
         mdp_dic_processado["preco_sem_taxa"] = (
@@ -156,8 +156,8 @@ def pos_processamento(
             logger.error(
                 "pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=%f, "
                 "pp_valores_processados['preco_sem_taxa']=%f",
-                pp_taxa_ativo_unitario * pp_valores_processados['quantidade'],
-                pp_valores_processados['preco_sem_taxa'],
+                pp_taxa_ativo_unitario * pp_valores_processados["quantidade"],
+                pp_valores_processados["preco_sem_taxa"],
             )
             msg = (
                 "pp_taxa_ativo_unitario * pp_valores_processados['quantidade'] "
