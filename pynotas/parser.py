@@ -152,7 +152,7 @@ def pos_processamento(
             pp_taxa_ativo_unitario * pp_valores_processados["quantidade"],
             pp_valores_processados["preco_sem_taxa"],
         ):
-            # TODO pra que serve isso?
+            # TODO @arthurazs: pra que serve isso?
             logger.error(
                 "pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=%f, "
                 "pp_valores_processados['preco_sem_taxa']=%f",

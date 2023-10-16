@@ -265,7 +265,7 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: 
                                 temp_prices,
                                 temp_totals,
                             ) = get_data(elements, date_flag)
-                            # TODO remove date_flag, read date of each line
+                            # TODO @arthurazs: remove date_flag, read date of each line
                             if date_flag:
                                 date = temp_date
                                 date_flag = False
@@ -303,7 +303,7 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: 
                         except AttributeError:
                             break
         except StopIteration:
-            # TODO pegar total no fim do pdf e validar com o que foi lido
+            # TODO @arthurazs: pegar total no fim do pdf e validar com o que foi lido
             continue
 
     if flag_v1:

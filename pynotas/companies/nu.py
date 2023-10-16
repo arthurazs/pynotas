@@ -88,7 +88,7 @@ def _add_dec2list(
         if adl_contador == adl_flag:
             return adl_lista
         adl_texto = get_next_text(adl_elementos)
-        # TODO replace D apenas no total
+        # TODO @arthurazs: replace D apenas no total
         adl_lista.append(to_dec(adl_texto.replace(" D", "")))
         adl_contador += 1
 
