@@ -71,7 +71,8 @@ def assert_almost_equal(
 ) -> None:
     if not almost_equal(a, b, precision):
         print(f"\n{a=}\n{b=}")
-        raise SystemError(f"[{text}] a != b")
+        msg = f"[{text}] a != b"
+        raise SystemError(msg)
 
 
 def assert1page(file_path: pathlib.Path) -> None:
@@ -82,7 +83,8 @@ def assert1page(file_path: pathlib.Path) -> None:
         pages = resolve1(doc.catalog["Pages"])
         pages_count = pages.get("Count", 0)
         if pages_count != 1:
-            raise NotImplementedError("Only works for PDFs with one page...")
+            msg = "Only works for PDFs with one page..."
+            raise NotImplementedError(msg)
 
 
 def _assert_data_found(
@@ -100,24 +102,35 @@ def _assert_data_found(
 ) -> None:
 
     if data_nota == dt.datetime(1970, 1, 1):
-        raise SystemError("data_nota not found in PDF")
+        msg = "data_nota not found in PDF"
+        raise SystemError(msg)
     if contador < 1:
-        raise SystemError("no assets in PDF?")
+        msg = "no assets in PDF?"
+        raise SystemError(msg)
     if len(ativos) == 0:
-        raise SystemError("no assets in PDF?")
+        msg = "no assets in PDF?"
+        raise SystemError(msg)
     if len(tipos) == 0:
-        raise SystemError("no types in PDF?")
+        msg = "no types in PDF?"
+        raise SystemError(msg)
     if len(quantidades) == 0:
-        raise SystemError("no quantities in PDF?")
+        msg = "no quantities in PDF?"
+        raise SystemError(msg)
     if len(precos) == 0:
-        raise SystemError("no prices in PDF?")
+        msg = "no prices in PDF?"
+        raise SystemError(msg)
     if len(totais) == 0:
-        raise SystemError("no totals in PDF?")
+        msg = "no totals in PDF?"
+        raise SystemError(msg)
     if taxa_liquidacao < 0:
-        raise SystemError("no liquidation fee in PDF?")
+        msg = "no liquidation fee in PDF?"
+        raise SystemError(msg)
     if taxa_emolumento < 0:
-        raise SystemError("no emolument fee in PDF?")
+        msg = "no emolument fee in PDF?"
+        raise SystemError(msg)
     if nota_total_sem_taxa < 0:
-        raise SystemError("no total without fee in PDF?")
+        msg = "no total without fee in PDF?"
+        raise SystemError(msg)
     if nota_total_com_taxa < 0:
-        raise SystemError("no total with fee in PDF?")
+        msg = "no total with fee in PDF?"
+        raise SystemError(msg)

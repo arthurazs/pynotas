@@ -187,10 +187,12 @@ def _assert_list(
     al_size: int,
 ) -> None:
     if len(al_data) == 0:
-        raise SystemError(f"no {al_name} in PDF?")
+        msg = f"no {al_name} in PDF?"
+        raise SystemError(msg)
     elif len(al_data) != al_size:
+        msg = f"missing {al_name} in PDF...\nExpected {al_size}, got {len(al_data)}"
         raise SystemError(
-            f"missing {al_name} in PDF...\nExpected {al_size}, got {len(al_data)}"
+            msg
         )
 
 
@@ -205,7 +207,8 @@ def assert_data_found(
     adf_totals: list[dec.Decimal],
 ) -> None:
     if adf_date == dt.date(1970, 1, 1):
-        raise SystemError("no date in PDF?")
+        msg = "no date in PDF?"
+        raise SystemError(msg)
     for adf_data, adf_name in (
         (adf_actions, "actions"),
         (adf_tickers, "tickers"),
