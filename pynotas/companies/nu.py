@@ -157,7 +157,6 @@ def _alternative(
             continue
         try:
             dec.Decimal(a_text)
-            return a_list, a_types, a_counter, a_text
         except dec.InvalidOperation:
             if " CI" in a_text:
                 a_types.append("FII")
@@ -168,6 +167,8 @@ def _alternative(
             a_list.append(a_text)
 
             a_counter += 1
+        else:
+            return a_list, a_types, a_counter, a_text
 
 
 def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901, PLR0912, PLR0915
