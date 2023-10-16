@@ -1,13 +1,13 @@
 import csv
+import logging
 import os
 import pathlib
+import sys
 from typing import Callable, Mapping, Sequence, TypedDict
 
 from pynotas import read_avenue, read_nu, read_xp
-from pynotas.utils import CABECALHO, assert1page
 from pynotas.models import LinhaPlanilha
-import logging
-import sys
+from pynotas.utils import CABECALHO, assert1page
 
 try:
     log_level = logging.INFO if sys.argv[1] == '-v' else logging.WARNING

@@ -1,12 +1,13 @@
-import pytz as tz
 import datetime as dt
 import decimal as dec
 import pathlib
 from typing import TYPE_CHECKING, Iterator, Sequence
 
+import pytz as tz
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextBoxHorizontal
 
+from pynotas.models import Planilha, ProcessedDataType
 from pynotas.parser import (
     SEPARADORES_NU,
     get_next,
@@ -17,7 +18,6 @@ from pynotas.parser import (
     to_dec,
     to_dt,
 )
-from pynotas.models import ProcessedDataType, Planilha
 
 if TYPE_CHECKING:
     from pynotas.models import LinhaPlanilha

@@ -6,9 +6,8 @@ from typing import Iterator, Sequence
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextBoxHorizontal
 
-from pynotas.parser import _dec2str, get_next, get_next_text, get_text
 from pynotas.models import LinhaPlanilha, Sheet, TickerType
-
+from pynotas.parser import _dec2str, get_next, get_next_text, get_text
 
 stock = TickerType.stock
 etf = TickerType.etf

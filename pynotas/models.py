@@ -1,8 +1,8 @@
 
-from enum import Enum
 import datetime as dt
-from typing import NamedTuple, TypedDict, Mapping, MutableMapping, TypeVar
 import decimal as dec
+from enum import Enum
+from typing import Mapping, MutableMapping, NamedTuple, TypedDict, TypeVar
 
 ProcessedDataType = Mapping[str, MutableMapping[str, dec.Decimal]]
 AnyNumber = TypeVar("AnyNumber", int, dec.Decimal)

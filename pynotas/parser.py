@@ -1,21 +1,23 @@
 import datetime as dt
 import decimal as dec
 from typing import TYPE_CHECKING, Iterator, Mapping, MutableMapping, Sequence
-from pynotas.models import LinhaPlanilha, Planilha
 
 import pytz as tz
+
+from pynotas.models import LinhaPlanilha, Planilha
 
 if TYPE_CHECKING:
     from pdfminer.layout import LTTextBoxHorizontal
 
+import logging
+import sys
+
+from pynotas.models import LinhaPlanilha, ProcessedDataType
 from pynotas.utils import (
     _assert_data_found,
     almost_equal,
     assert_almost_equal,
 )
-from pynotas.models import LinhaPlanilha, ProcessedDataType
-import sys
-import logging
 
 logger = logging.getLogger(__name__)
 

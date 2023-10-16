@@ -1,17 +1,17 @@
-import pytz as tz
 import datetime as dt
 import decimal as dec
+import logging
 import pathlib
-from typing import Any, Final, Sequence, TYPE_CHECKING
+import sys
+from typing import TYPE_CHECKING, Any, Final, Sequence
 
+import pytz as tz
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdftypes import resolve1
-import sys
-import logging
 
 if TYPE_CHECKING:
-    from pynotas.models import Planilha, AnyNumber
+    from pynotas.models import AnyNumber, Planilha
 
 
 logger = logging.getLogger(__name__)
