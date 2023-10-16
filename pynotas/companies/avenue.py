@@ -51,7 +51,7 @@ def get_next_decimal(gnd_elements: Iterator["LTTextBoxHorizontal"]) -> dec.Decim
             continue
 
 
-def get_next_date(gnd_elements: Iterator["LTTextBoxHorizontal"], v2_flag: bool = True) -> dt.date:
+def get_next_date(gnd_elements: Iterator["LTTextBoxHorizontal"], *, v2_flag: bool = True) -> dt.date:
     while True:
         gnd_text = get_next_text(gnd_elements)
         try:
@@ -79,7 +79,7 @@ def get_ticker(gt_elements: Iterator["LTTextBoxHorizontal"]) -> str:
         return gt_text
 
 
-def get_data(gd_elements: Iterator["LTTextBoxHorizontal"], gd_flag: bool = False) -> tuple[
+def get_data(gd_elements: Iterator["LTTextBoxHorizontal"], *, gd_flag: bool = False) -> tuple[
     dt.date,
     list[str],
     list[dec.Decimal],
@@ -261,7 +261,7 @@ def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: 
                                 temp_tickers,
                                 temp_prices,
                                 temp_totals,
-                            ) = get_data(elements, date_flag)
+                            ) = get_data(elements, gd_flag=date_flag)
                             # TODO @arthurazs: remove date_flag, read date of each line
                             if date_flag:
                                 date = temp_date
