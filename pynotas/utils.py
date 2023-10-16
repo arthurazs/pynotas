@@ -8,9 +8,13 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdftypes import resolve1
 import sys
+import logging
 
 if TYPE_CHECKING:
     from pynotas.models import Planilha, AnyNumber
+
+
+logger = logging.getLogger(__name__)
 
 FLOATING_ERROR_PRECISION: Final[dec.Decimal] = dec.Decimal(1e-10)
 
@@ -37,9 +41,9 @@ CABECALHO: Final[Sequence[str]] = (
 
 
 def eprint(*args: Any) -> None:
-    print()
+    logger.info("eprint: ")
     for index, arg in enumerate(args):
-        print(index, arg)
+        logger.info(f"eprint: {index} {arg}")
     sys.exit()
 
 
@@ -56,7 +60,7 @@ def assert_almost_equal(
     precision: dec.Decimal = FLOATING_ERROR_PRECISION,
 ) -> None:
     if not almost_equal(a, b, precision):
-        print(f"\n{a=}\n{b=}")
+        logger.error(f"\n{a=}\n{b=}")
         msg = f"[{text}] a != b"
         raise SystemError(msg)
 

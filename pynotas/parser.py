@@ -15,6 +15,9 @@ from pynotas.utils import (
 )
 from pynotas.models import LinhaPlanilha, ProcessedDataType
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 SEPARADORES_XP: Sequence[tuple[str | None, int]] = (
     (" CI ER", 0),
@@ -33,10 +36,10 @@ SEPARADORES_NU: Sequence[tuple[str | None, int]] = (
 
 
 def aprint(elements: Iterator["LTTextBoxHorizontal"]) -> None:
-    print()
+    logger.info("aprint: ")
     while True:
         try:
-            print(">>>", get_next_text(elements))
+            logger.info(f"aprint: >>> {get_next_text(elements)}")
         except StopIteration:
             sys.exit()
         except AttributeError:
@@ -114,7 +117,7 @@ def montar_dados_processados(
                 mdp_quantidade_nota * mdp_ativo_nota["preco_sem_taxa"][mdp_indice]
             )
         if mdp_total_processado != sum(mdp_ativo_nota["total_sem_taxa"]):
-            print(
+            logger.error(
                 f"{mdp_nome_nota=}, {mdp_total_processado=}, "
                 f"{sum(mdp_ativo_nota['total'])=}"
             )
@@ -159,7 +162,7 @@ def pos_processamento(
             pp_valores_processados["preco_sem_taxa"],
         ):
             # TODO pra que serve isso?
-            print(
+            logger.error(
                 f"{pp_taxa_ativo_unitario * pp_valores_processados['quantidade']=}, "
                 f"{pp_valores_processados['preco_sem_taxa']=}"
             )
