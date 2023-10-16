@@ -237,7 +237,7 @@ def build_sheet(
     return bs_list
 
 
-def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: PLR0912, PLR0915
+def read_avenue(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901, PLR0912, PLR0915
 
     counter = 0
     date = dt.date(1970, 1, 1)

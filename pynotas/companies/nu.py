@@ -178,7 +178,7 @@ def _alternative(
             a_counter += 1
 
 
-def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: PLR0912, PLR0915
+def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:  # noqa: C901, PLR0912, PLR0915
 
     versao: int | None = None
     data_nota = dt.datetime(1970, 1, 1, tzinfo=tz.utc)

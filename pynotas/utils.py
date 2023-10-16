@@ -73,9 +73,7 @@ def assert1page(file_path: pathlib.Path) -> None:
             raise NotImplementedError(msg)
 
 
-def _assert_data_found(
-    planilha: "Planilha"
-) -> None:
+def _assert_data_found(planilha: "Planilha") -> None:  # noqa: C901
 
     if planilha.data_nota == dt.datetime(1970, 1, 1, tzinfo=tz.utc):
         msg = "data_nota not found in PDF"
