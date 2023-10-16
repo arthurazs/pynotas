@@ -54,13 +54,14 @@ def ativo(a_elementos: Iterator["LTTextBoxHorizontal"]) -> tuple[list[str], list
     a_ativos = []
     a_tipos = []
     for a_nome in a_nomes:
+        new_nome = a_nome
         if " CI" in a_texto:
             a_tipos.append("FII")
         else:
             a_tipos.append("Ação")
         for a_separador, a_indice in SEPARADORES_XP:
-            a_nome = a_nome.split(a_separador)[a_indice]
-        a_ativos.append(a_nome)
+            new_nome = a_nome.split(a_separador)[a_indice]
+        a_ativos.append(new_nome)
     return a_ativos, a_tipos
 
 
