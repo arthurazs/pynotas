@@ -1,3 +1,4 @@
+import pytz as tz
 import datetime as dt
 import decimal as dec
 import pathlib
@@ -101,7 +102,7 @@ def _assert_data_found(
     nota_total_com_taxa: dec.Decimal,
 ) -> None:
 
-    if data_nota == dt.datetime(1970, 1, 1):
+    if data_nota == dt.datetime(1970, 1, 1, tzinfo=tz.utc):
         msg = "data_nota not found in PDF"
         raise SystemError(msg)
     if contador < 1:

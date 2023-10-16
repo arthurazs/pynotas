@@ -1,3 +1,4 @@
+import pytz as tz
 import datetime as dt
 import decimal as dec
 import pathlib
@@ -180,7 +181,7 @@ def _alternative(
 def read_nu(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
 
     versao: int | None = None
-    data_nota = dt.datetime(1970, 1, 1)
+    data_nota = dt.datetime(1970, 1, 1, tzinfo=tz.utc)
     contador = 0
     contador_alt = 0
     ativos: list[str] = []

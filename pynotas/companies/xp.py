@@ -1,3 +1,4 @@
+import pytz as tz
 import datetime as dt
 import decimal as dec
 import pathlib
@@ -110,7 +111,7 @@ def liquido(l_elementos: Iterator["LTTextBoxHorizontal"]) -> dec.Decimal:
 
 def read_xp(file_path: pathlib.Path) -> Sequence["LinhaPlanilha"]:
 
-    data_nota = dt.datetime(1970, 1, 1)
+    data_nota = dt.datetime(1970, 1, 1, tzinfo=tz.utc)
     contador = 0
 
     ativos: list[str] = []
